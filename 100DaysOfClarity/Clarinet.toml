@@ -1,0 +1,46 @@
+[project]
+name = "100DaysOfClarity"
+authors = []
+description = ""
+telemetry = true
+requirements = []
+boot_contracts = ["pox", "costs-v2", "bns"]
+
+[project.cache_location]
+path = ".requirements"
+[contracts.artist-discography]
+path = "contracts/artist-discography.clar"
+
+[contracts.clarity-basics-i]
+path = "contracts/clarity-basics-i.clar"
+
+[contracts.clarity-basics-ii]
+path = "contracts/clarity-basics-ii.clar"
+
+[contracts.clarity-basics-iii]
+path = "contracts/clarity-basics-iii.clar"
+
+[contracts.clarity-basics-iv]
+path = "contracts/clarity-basics-iv.clar"
+
+[contracts.community-hello-world]
+path = "contracts/community-hello-world.clar"
+
+[contracts.increase-count-encap]
+path = "contracts/increase-count-encap.clar"
+
+[contracts.increase-count-trail]
+path = "contracts/increase-count-trail.clar"
+
+[repl]
+costs_version = 2
+parser_version = 2
+
+[repl.analysis]
+passes = ["check_checker"]
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
