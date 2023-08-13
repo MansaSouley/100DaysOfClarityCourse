@@ -27,6 +27,9 @@
 ;; Normal Withdrawal fee (2%)
 (define-constant normal-withdrawal-fee u2)
 
+;; 18 years in Blockheight (18 years * 365 *144 blocks/day)
+(define-constant eighteen-years-in-block-height (* u18 (* u365 u144)))
+
 ;; Admin list of principals
 (define-data-var admin-list (list 10 principal) (list tx-sender))
 
@@ -44,7 +47,37 @@
 ;;; Read Functions  ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Get Offspring wallet
+(define-read-only (get-offspring-wallet (parent principal)) 
+    (map-get? offspring-wallet parent)
+)
 
+;; Get Offspring Wallet Balance
+(define-read-only (get-offspring-wallet-balance (parent principal)) 
+    (default-to u0 (get balance (map-get? offspring-wallet parent)))
+)
+
+;; Get Offsrping Principal
+(define-read-only (get-offspring-wallet-principal (parent principal)) 
+    (get offspring-principal (map-get? offspring-wallet parent))
+)
+
+;; Get Offspring dob
+(define-read-only (get-offspring-wallet-dob (parent principal)) 
+    (get offspring-dob (map-get? offspring-wallet parent))
+)
+
+(define-read-only (get-offspring-wallet-unlock-height (parent principal)) 
+    (let 
+        (   
+            ;; vars - dob
+            (offspring-dob (unwrap! (get-offspring-wallet-dob parent) (err u1)))
+        ) 
+        
+        (ok (+ offspring-dob eighteen-years-in-block-height))
+        
+    )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Parent Functions ;;;;
