@@ -6,11 +6,21 @@
 ;; Offspring Wallet
 ;; This our main map that is created & funded by a parent, & only unlockable by an assigned offspring(principal)
 ;; Principal -> {offspring-principal: principal, offspring-dob: uint, balance: (optinal uint)}
+;; 1. Create wallet
+;; 2. Fund wallet
+;; 3. Claim wallet
+    ;; A. OffSpring
+    ;; B. Parent/Admin
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Cons, Vars & Maps ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Deployer
+(define-constant deployer tx-sender)
+
+;; Contract
+(define-constant contract (as-contract tx-sender))
 
 ;; create Offspring wallet fee
 (define-constant create-wallet-fee u5000000)
@@ -33,7 +43,7 @@
 ;; Admin list of principals
 (define-data-var admin-list (list 10 principal) (list tx-sender))
 
-;; TOtal Fees Earned
+;; Total Fees Earned
 (define-data-var total-fees-earned uint u0)
 
 ;; Offspring Wallet
@@ -79,11 +89,57 @@
     )
 )
 
+;; Get earned fees
+(define-read-only (get-earned-fees) 
+    (var-get total-fees-earned)
+)
+
+;; Get STX in Contract
+(define-read-only (get-contract-stx-balance) 
+    (stx-get-balance contract)
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Parent Functions ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; (define-map offspring-wallet principal { 
+;;     offspring-principal: principal, 
+;;     offspring-dob: uint, 
+;;     balance: uint
+;;  })
 
+;; Create wallet
+;; @desc - creates new offspring wallet new parent (no initial deposit required)
+;; @param - new-offspring-principal: principal, new-offspring-dob: uint, balance
+(define-public (create-wallet (new-offspring-principal principal) (new-offspring-dob uint) ) 
+    (let 
+        (
+            ;; Local vars here
+            
+        ) 
+        ;; Assert that map-get? offspring-wallet is-none
+        
+        ;; Assert  that new-offspring-dob is at least higher than block-height - 18 years of blocks
+
+        ;; Map-set offspring-wallet
+
+        (ok false)
+    )
+)
+
+;; Fund Wallet
+;; @desc - allows anyone to fund an existing wallet
+;; @param - parent-principal: principal, amount: uint
+(define-public (fund-wallet (parent-principal principal) (amount uint)) 
+    (let 
+        (
+            
+        ) 
+
+        (ok false)
+    )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Offspring Functions ;;;;
