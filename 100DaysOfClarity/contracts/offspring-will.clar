@@ -28,8 +28,8 @@
 ;; Add Offspring Wallet Funds fee
 (define-constant add-wallet-funds-fee u2000000)
 
-;; Min. Add Offspring Wallet Funds fee
-(define-constant min-create-wallet-fee u5000000)
+;; Min. Add Offspring Wallet Funds amount
+(define-constant min-add-wallet-amount u5000000)
 
 ;; Early Withdrawal fee (10%)
 (define-constant early-withdrawal-fee u10)
@@ -122,6 +122,10 @@
         
         ;; Assert  that new-offspring-dob is at least higher than block-height - 18 years of blocks
 
+        ;; Assert that new-offspring-principal is Not an admin or tx-sender
+
+        ;; Pay create-wallet-fee in stx
+
         ;; Map-set offspring-wallet
 
         (ok false)
@@ -130,12 +134,22 @@
 
 ;; Fund Wallet
 ;; @desc - allows anyone to fund an existing wallet
-;; @param - parent-principal: principal, amount: uint
-(define-public (fund-wallet (parent-principal principal) (amount uint)) 
+;; @param - parent: principal, amount: uint
+(define-public (fund-wallet (parent principal) (amount uint)) 
     (let 
         (
-            
+            (current-offspring-wallet (unwrap! (map-get? offspring-wallet parent) (err "err-no-offspring-wallet")))
         ) 
+        ;; Assert that amount is higher than min-add-wallet-amount ()
+
+        ;; Send stx (amount - fee) to contract
+
+        ;; Send stx (fee) to deployer
+
+        ;; Var-set total-fees
+
+        ;; Map-set current offspring-wallet by merging with old balance + amount
+
 
         (ok false)
     )
@@ -145,13 +159,108 @@
 ;;;; Offspring Functions ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; (define-map offspring-wallet principal { 
+;;     offspring-principal: principal, 
+;;     offspring-dob: uint, 
+;;     balance: uint
+;;  })
 
-;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Write Functions ;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;
+;; Claim Wallet
+;; @desc - allows offspring to claim wallet once & once only
+;; @param - parent: principal
+(define-public (claim-wallet (parent principal)) 
+    (let 
+        (
+            (current-offspring-wallet (unwrap! (map-get? offspring-wallet parent) (err "err--no-offspring-wallet")))
+        
+        )
 
+        ;; Assert tx-sender is-eq to offspring-principal
+
+        ;; Assert that block-height => 18 years 
+
+        ;; send stx(amount - withdrawal fee) to offspring wallet
+
+        ;; send stx withdrawal to deployer
+
+        ;; Delete offspring-wallet map
+
+        ;; Update total-fees-earned
+        
+        (ok false)
+    )
+
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Emergency Functions ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Emergengy Claim
+;; @desc - allows either parent or and admin to withdraw all stx (minus early withdrawal fee), back to parent & remove wallet
+;; @param - parent: principal
+(define-public (emergency-claim (parent principal)) 
+    (let 
+        (
+            (current-offspring-wallet (unwrap! (map-get? offspring-wallet parent) (err "err--no-offspring-wallet")))
+        ) 
+
+        ;; Assert that tx-sender is parent or admin
+
+        ;; Assert that block-height is Not 18 years in block later than offspring-dob
+
+        ;; Send stx (amount - early-withdrawal-fee) to offspring
+
+        ;; Send stx early-withdrawal to deployer
+
+        ;; Delete offspring-wallet map
+
+        ;; Update total-fees-earned
+        
+        (ok false)
+    )
+
+)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Admin Functions ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Add admin
+;; @desc - function to add an admin to the existing admins list
+;; @param - new-admin: principal
+(define-public (add-admin (new-admin principal)) 
+    (let 
+        (
+            (test false)
+        ) 
+        ;; Assert that tx-sender is parent or admin
+
+        ;; Assert that admin is NOT already an admin
+
+        ;; Map-set  append new admin
+
+        (ok test)
+
+    )
+)
+
+;; Remove Admin
+;; @desc - function that allows the parent or admin to remove an admin
+;; @param - admin: principal
+(define-public (remove-admin (removed-admin principal)) 
+    (let 
+        (
+            (test false)
+        ) 
+        ;; Assert that tx-sender is parent or admin
+
+        ;; Assert that removed-admin is an admin
+
+        ;; Map-set  remove admin from admin list
+
+        (ok test)
+
+    )
+)
