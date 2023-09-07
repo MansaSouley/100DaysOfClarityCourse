@@ -67,7 +67,7 @@
     (default-to u0 (get balance (map-get? offspring-wallet parent)))
 )
 
-;; Get Offsrping Principal
+;; Get Offspring Principal
 (define-read-only (get-offspring-wallet-principal (parent principal)) 
     (get offspring-principal (map-get? offspring-wallet parent))
 )
@@ -103,11 +103,7 @@
 ;;; Parent Functions ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (define-map offspring-wallet principal { 
-;;     offspring-principal: principal, 
-;;     offspring-dob: uint, 
-;;     balance: uint
-;;  })
+
 
 ;; Create wallet
 ;; @desc - creates new offspring wallet new parent (no initial deposit required)
@@ -116,22 +112,44 @@
     (let 
         (
             ;; Local vars here
+            (current-total-fees (var-get total-fees-earned))
+            (new-total-fees (+ current-total-fees create-wallet-fee))
             
         ) 
         ;; Assert that map-get? offspring-wallet is-none
+        (asserts! (is-none (get-offspring-wallet tx-sender))  (err "offspring-wallet-already-exists"))
         
         ;; Assert  that new-offspring-dob is at least higher than block-height - 18 years of blocks
+        (asserts! (> (+ new-offspring-dob eighteen-years-in-block-height)  block-height) (err "You too old!"))
 
         ;; Assert that new-offspring-principal is Not an admin or tx-sender
+        (asserts! (or 
+                    (is-none (index-of (var-get admin-list) new-offspring-principal)) 
+                    (not (is-eq new-offspring-principal tx-sender))
+                   ) 
+                   (err "err-invalid-offspring-principal")
+        )
 
         ;; Pay create-wallet-fee in stx
+        (unwrap! (stx-transfer? create-wallet-fee tx-sender deployer) (err "err-stx-transfer-wallet-fee"))
+
+        ;; Var-get total-fees
+        (var-set total-fees-earned new-total-fees)
 
         ;; Map-set offspring-wallet
-
-        (ok false)
+        (ok (map-set offspring-wallet tx-sender {
+            offspring-principal: new-offspring-principal, 
+            offspring-dob: new-offspring-dob, 
+            balance: u0
+        }))
+        
     )
 )
-
+;; (define-map offspring-wallet principal { 
+;;     offspring-principal: principal, 
+;;     offspring-dob: uint, 
+;;     balance: uint
+;;  })
 ;; Fund Wallet
 ;; @desc - allows anyone to fund an existing wallet
 ;; @param - parent: principal, amount: uint
