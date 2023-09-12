@@ -157,19 +157,32 @@
     (let 
         (
             (current-offspring-wallet (unwrap! (map-get? offspring-wallet parent) (err "err-no-offspring-wallet")))
+            (current-offspring-wallet-balance (get balance current-offspring-wallet))
+            (new-offspring-wallet-balance (+ amount current-offspring-wallet-balance))
+            (current-total-fees (var-get total-fees-earned))
+            (new-total-fees (+ current-total-fees min-add-wallet-amount))
         ) 
         ;; Assert that amount is higher than min-add-wallet-amount ()
+        (asserts! (> amount min-add-wallet-amount) (err "err-not-enough-stx"))
 
         ;; Send stx (amount - fee) to contract
+        (unwrap! (stx-transfer? (- amount add-wallet-funds-fee) tx-sender contract) (err "err-sending-stx-to-contract"))
 
         ;; Send stx (fee) to deployer
+        (unwrap! (stx-transfer? add-wallet-funds-fee tx-sender deployer) (err "err-sending-stx-to-deployer"))
 
         ;; Var-set total-fees
+        (var-set total-fees-earned new-total-fees)
 
         ;; Map-set current offspring-wallet by merging with old balance + amount
+        (ok (map-set offspring-wallet parent
+            (merge 
+                current-offspring-wallet
+                { balance: new-offspring-wallet-balance}
+            )        
+        ))
 
-
-        (ok false)
+        
     )
 )
 
