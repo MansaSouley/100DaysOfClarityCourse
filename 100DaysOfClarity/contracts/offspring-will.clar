@@ -156,9 +156,10 @@
 (define-public (fund-wallet (parent principal) (amount uint)) 
     (let 
         (
+            (amount-without-fee (- amount add-wallet-funds-fee))
             (current-offspring-wallet (unwrap! (map-get? offspring-wallet parent) (err "err-no-offspring-wallet")))
             (current-offspring-wallet-balance (get balance current-offspring-wallet))
-            (new-offspring-wallet-balance (+ amount current-offspring-wallet-balance))
+            (new-offspring-wallet-balance (+ amount-without-fee current-offspring-wallet-balance))
             (current-total-fees (var-get total-fees-earned))
             (new-total-fees (+ current-total-fees min-add-wallet-amount))
         ) 
@@ -166,7 +167,7 @@
         (asserts! (> amount min-add-wallet-amount) (err "err-not-enough-stx"))
 
         ;; Send stx (amount - fee) to contract
-        (unwrap! (stx-transfer? (- amount add-wallet-funds-fee) tx-sender contract) (err "err-sending-stx-to-contract"))
+        (unwrap! (stx-transfer? amount-without-fee tx-sender contract) (err "err-sending-stx-to-contract"))
 
         ;; Send stx (fee) to deployer
         (unwrap! (stx-transfer? add-wallet-funds-fee tx-sender deployer) (err "err-sending-stx-to-deployer"))
@@ -203,22 +204,30 @@
     (let 
         (
             (current-offspring-wallet (unwrap! (map-get? offspring-wallet parent) (err "err--no-offspring-wallet")))
-        
+            (current-offspring (get offspring-principal current-offspring-wallet))
+            (current-dob (get offspring-dob current-offspring-wallet))
+            (current-balance (get balance current-offspring-wallet ))
+            (current-withdrawal-fee (/ (* current-balance u2) u100))  
+            (current-total-fees (var-get total-fees-earned))                  
         )
 
         ;; Assert tx-sender is-eq to offspring-principal
+        (asserts! (is-eq tx-sender current-offspring) (err "err-not-offspring"))
 
         ;; Assert that block-height => 18 years 
+        (asserts! (> block-height (+ eighteen-years-in-block-height current-dob)) (err "err-not-eighteen"))
 
         ;; send stx(amount - withdrawal fee) to offspring wallet
-
+        (unwrap! (as-contract (stx-transfer? (- current-balance current-withdrawal-fee) tx-sender current-offspring)) (err "err-sending-stx-offspring"))
+        
         ;; send stx withdrawal to deployer
-
+        (unwrap! (as-contract (stx-transfer? current-withdrawal-fee tx-sender deployer)) (err "err-sending-stx-deployer"))
+        
         ;; Delete offspring-wallet map
+        (map-delete offspring-wallet parent)
 
         ;; Update total-fees-earned
-        
-        (ok false)
+        (ok (var-set total-fees-earned (+ current-total-fees current-withdrawal-fee)))        
     )
 
 )
