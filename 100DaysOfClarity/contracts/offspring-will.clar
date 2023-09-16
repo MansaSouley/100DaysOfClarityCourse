@@ -99,6 +99,20 @@
     (stx-get-balance contract)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Private Functions ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-private (is-parent-or-owner (parent principal)) 
+        ;; Assert that tx-sender is parent or admin
+        (asserts! (or 
+                        (is-some (index-of (var-get admin-list) tx-sender)) 
+                        (is-eq parent tx-sender)
+                   ) 
+                   false
+        )
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Parent Functions ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -243,21 +257,34 @@
     (let 
         (
             (current-offspring-wallet (unwrap! (map-get? offspring-wallet parent) (err "err--no-offspring-wallet")))
+            (current-offspring (get offspring-principal current-offspring-wallet))
+            (current-offspring-dob (get offspring-dob current-offspring-wallet))
+            (current-offspring-balance (get balance current-offspring-wallet ))
+            (current-withdrawal-fee (/ (* current-offspring-balance early-withdrawal-fee) u100))
+            (current-total-fees (var-get total-fees-earned))
         ) 
 
         ;; Assert that tx-sender is parent or admin
-
+         (asserts! (or 
+                        (is-some (index-of (var-get admin-list) tx-sender)) 
+                        (is-eq parent tx-sender)
+                   ) 
+                   (err "err-unauthorized")
+        )
         ;; Assert that block-height is Not 18 years in block later than offspring-dob
+        (asserts! (< block-height (+ eighteen-years-in-block-height current-offspring-dob)) (err "err-too-late"))
 
         ;; Send stx (amount - early-withdrawal-fee) to offspring
-
+        (unwrap! (as-contract (stx-transfer? (- current-offspring-balance current-withdrawal-fee) tx-sender current-offspring)) (err "err-sending-stx-offspring"))
+        
         ;; Send stx early-withdrawal to deployer
+        (unwrap! (as-contract (stx-transfer? current-withdrawal-fee tx-sender deployer)) (err "err-sending-stx-deployer"))
 
         ;; Delete offspring-wallet map
+        (map-delete offspring-wallet parent)
 
         ;; Update total-fees-earned
-        
-        (ok false)
+        (ok (var-set total-fees-earned (+ current-total-fees current-withdrawal-fee)))  
     )
 
 )
@@ -273,34 +300,17 @@
 (define-public (add-admin (new-admin principal)) 
     (let 
         (
-            (test false)
+            (current-admins (var-get admin-list))
         ) 
         ;; Assert that tx-sender is parent or admin
+        (asserts! (is-some (index-of current-admins tx-sender)) (err "err-not-authorized"))
 
         ;; Assert that admin is NOT already an admin
+        (asserts! (is-none (index-of current-admins new-admin)) (err "err-duplicate-admin"))
 
         ;; Map-set  append new admin
-
-        (ok test)
-
-    )
-)
-
-;; Remove Admin
-;; @desc - function that allows the parent or admin to remove an admin
-;; @param - admin: principal
-(define-public (remove-admin (removed-admin principal)) 
-    (let 
-        (
-            (test false)
-        ) 
-        ;; Assert that tx-sender is parent or admin
-
-        ;; Assert that removed-admin is an admin
-
-        ;; Map-set  remove admin from admin list
-
-        (ok test)
-
+        (ok (var-set admin-list 
+            (unwrap! (as-max-len? (append current-admins new-admin) u10) (err "err-admin-list-overflow"))    
+        ))      
     )
 )
