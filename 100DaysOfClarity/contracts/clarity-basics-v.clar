@@ -54,3 +54,28 @@
 (define-private (hello-name (item (string-ascii 24))) 
     (concat "Hello " item)
 )
+
+
+;; Day 48 - Map Revisited
+(define-constant test-list-principals (list 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG 'ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC))
+(define-constant test-list-tuple (list {user: "Alice", balance: u10} {user: "Bob", balance: u11} {user: "Carl", balance: u12} ))
+(define-public (test-send-stx-multiple) 
+    (ok (map send-stx-multiple test-list-principals))
+)
+(define-read-only (test-get-users) 
+    (map get-user test-list-tuple)
+)
+(define-read-only (test-get-balance) 
+    (map get-balance test-list-tuple)
+)
+
+(define-private (send-stx-multiple (item principal)) 
+    (stx-transfer? u100000000 tx-sender item)
+)
+
+(define-private (get-user (item {user: (string-ascii 24), balance: uint})) 
+    (get user item)
+)
+(define-private (get-balance (item {user: (string-ascii 24), balance: uint})) 
+    (get balance item)
+)
