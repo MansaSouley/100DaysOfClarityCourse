@@ -38,6 +38,9 @@ path = "contracts/increase-count-trail.clar"
 [contracts.offspring-will]
 path = "contracts/offspring-will.clar"
 
+[contracts.sip-09]
+path = "contracts/sip-09.clar"
+
 [repl]
 costs_version = 2
 parser_version = 2
