@@ -104,3 +104,20 @@
 (define-private (concat-string (a (string-ascii 10)) (b (string-ascii 10))) 
     (unwrap-panic (as-max-len? (concat b a) u10))
 )
+
+;; Day 50 - Contract-call?
+(define-read-only (call-basics-i-multiply) 
+    (contract-call? .clarity-basics-i multiply )
+)
+(define-read-only (call-basics-i-hello-world) 
+    (contract-call? .clarity-basics-i say-hello-world-name)
+)
+(define-public (call-basics-ii-hello-world (name (string-ascii 48))) 
+    (contract-call? .clarity-basics-ii set-and-say-hello name)
+)
+(define-public (call-basics-iii-set-second-map (new-username (string-ascii 24)) (new-balance uint) (new-referral (optional principal))) 
+    (begin 
+        (try! (contract-call? .clarity-basics-ii set-and-say-hello new-username))
+        (contract-call? .clarity-basics-iii set-second-map new-username new-balance none)
+    )
+)
