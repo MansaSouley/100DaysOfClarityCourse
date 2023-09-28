@@ -121,3 +121,20 @@
         (contract-call? .clarity-basics-iii set-second-map new-username new-balance none)
     )
 )
+
+;; Day 52
+(define-non-fungible-token nft-test uint)
+(define-public (test-mint) 
+    (nft-mint? nft-test u0 tx-sender)
+)
+(define-read-only (test-get-owner (id uint)) 
+    (nft-get-owner? nft-test id)
+)
+(define-public (test-burn (id uint) (sender principal)) 
+    (nft-burn? nft-test id sender)
+)
+(define-public (test-transfer (id uint) (sender principal) (recipient principal)) 
+    (nft-transfer? nft-test u0 sender recipient)
+)
+
+;;
