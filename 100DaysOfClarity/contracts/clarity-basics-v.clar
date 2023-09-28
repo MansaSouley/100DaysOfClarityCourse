@@ -137,4 +137,57 @@
     (nft-transfer? nft-test u0 sender recipient)
 )
 
-;;
+;; Day 53 - Basic Minting Logic
+(define-non-fungible-token nft-test-2 uint)
+(define-data-var nft-index uint u1)
+(define-constant nft-limit u6)
+(define-constant nft-price u10000000)
+(define-constant nft-admin tx-sender)
+
+(define-public (free-unlimited-mint) 
+    (let 
+        (
+            (current-index (var-get nft-index))
+            (next-index (+ current-index u1))
+        ) 
+            ;; Mint nft to tx-sender
+            (unwrap! (nft-mint? nft-test-2 current-index tx-sender) (err "nft mint"))
+
+            ;; Var-set current-index
+            (ok (var-set nft-index next-index))
+    )
+)
+(define-public (free-limited-mint) 
+    (let 
+        (
+            (current-index (var-get nft-index))
+            (next-index (+ current-index u1))
+        ) 
+            ;; Asserts that index < limit
+            (asserts! (<= current-index nft-limit) (err "out of nfts"))
+            ;; Mint nft to tx-sender
+            (unwrap! (nft-mint? nft-test-2 current-index tx-sender) (err "nft mint"))
+
+            ;; Var-set current-index
+            (ok (var-set nft-index next-index))
+    )
+)
+(define-public (limited-mint) 
+    (let 
+        (
+            (current-index (var-get nft-index))
+            (next-index (+ current-index u1))
+        ) 
+            ;; Asserts that index <= limit
+            (asserts! (<= current-index nft-limit) (err "out of nfts"))
+            
+            ;; Charge 10 STX
+            (unwrap! (stx-transfer? nft-price tx-sender nft-admin) (err "STX transfer failed"))
+
+            ;; Mint nft to tx-sender
+            (unwrap! (nft-mint? nft-test-2 current-index tx-sender) (err "nft mint"))
+
+            ;; Var-set current-index
+            (ok (var-set nft-index next-index))
+    )
+)
