@@ -172,7 +172,7 @@
             (ok (var-set nft-index next-index))
     )
 )
-(define-public (limited-mint) 
+(define-public (limited-mint (metadata-url (string-ascii 256))) 
     (let 
         (
             (current-index (var-get nft-index))
@@ -187,7 +187,50 @@
             ;; Mint nft to tx-sender
             (unwrap! (nft-mint? nft-test-2 current-index tx-sender) (err "nft mint"))
 
+            ;; Update & store metadata url
+            (map-set nft-metadata current-index metadata-url)
+
             ;; Var-set current-index
             (ok (var-set nft-index next-index))
     )
+)
+
+
+;; Day 54 - NFT Metadata Logic
+(define-constant  static-url "https://example.com/")
+(define-map nft-metadata uint (string-ascii 256) )
+
+(define-public (get-token-uri-test (id uint)) 
+    (ok static-url)
+)
+(define-public (get-token-uri-2 (id uint)) 
+    (ok (concat 
+            static-url 
+            (concat  (uint-to-ascii id) ".json"))
+    )
+)
+(define-public (get-token-uri (id uint)) 
+    (ok (map-get? nft-metadata id))
+)
+
+
+
+(define-read-only (uint-to-ascii (value uint))
+  (if (<= value u9)
+    (unwrap-panic (element-at "0123456789" value))
+    (get r (fold uint-to-ascii-inner
+      0x000000000000000000000000000000000000000000000000000000000000000000000000000000
+      {v: value, r: ""}
+    ))
+  )
+)
+
+(define-read-only (uint-to-ascii-inner (i (buff 1)) (d {v: uint, r: (string-ascii 39)}))
+  (if (> (get v d) u0)
+    {
+      v: (/ (get v d) u10),
+      r: (unwrap-panic (as-max-len? (concat (unwrap-panic (element-at "0123456789" (mod (get v d) u10))) (get r d)) u39))
+    }
+    d
+  )
 )
