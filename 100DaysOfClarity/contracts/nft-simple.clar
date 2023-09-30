@@ -13,16 +13,17 @@
 ;; Adhere to SIP09
 (impl-trait .sip-09.nft-trait)
 
-
 ;; Collection Limit
 (define-constant collection-limit u100)
-
-;; Collection Index
-(define-data-var collection-index uint u1)
 
 ;; Root URI
 (define-constant collection-root-uri "ipfs://ipfs/QmYcrELFT5dsdes567trhsDSEDFVhesn4Idnfse/")
 
+;; Collection Index
+(define-data-var collection-index uint u1)
+
+;; NFT Price
+(define-constant simple-nft-price u10000000)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; SIP-09 Functions  ;;;;
@@ -87,6 +88,27 @@
 ;;;; Core Functions ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Core Mint Func
+;; @desc - core function used for minting one nft-simple
+(define-public (mint) 
+    (let 
+        (
+            (current-index (var-get collection-index))
+            (next-index (+ current-index u1))
+        ) 
+            ;; Assert that current-index < collection-limit
+            (asserts! (< current-index collection-limit) (err "err-minted-out"))
+
+            ;; Charge tx-sender for Simple-NFT
+            (unwrap! (stx-transfer? simple-nft-price tx-sender (as-contract tx-sender)) (err "err-stx-transfer"))
+
+            ;; Mint Simple-NFT
+            (unwrap! (nft-mint? simple-nft current-index tx-sender) (err "err-minting"))
+
+            ;; Update collection index
+            (ok (var-set collection-index next-index))            
+    )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Admin Functions ;;;;
