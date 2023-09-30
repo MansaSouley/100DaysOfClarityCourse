@@ -35,6 +35,9 @@ path = "contracts/increase-count-encap.clar"
 [contracts.increase-count-trail]
 path = "contracts/increase-count-trail.clar"
 
+[contracts.nft-simple]
+path = "contracts/nft-simple.clar"
+
 [contracts.offspring-will]
 path = "contracts/offspring-will.clar"
 
