@@ -26,6 +26,9 @@ path = "contracts/clarity-basics-iv.clar"
 [contracts.clarity-basics-v]
 path = "contracts/clarity-basics-v.clar"
 
+[contracts.clarity-basics-vi]
+path = "contracts/clarity-basics-vi.clar"
+
 [contracts.community-hello-world]
 path = "contracts/community-hello-world.clar"
 
