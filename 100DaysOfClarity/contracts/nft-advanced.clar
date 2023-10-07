@@ -45,25 +45,97 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Get last token Id
+(define-public (get-last-token-id) 
+    (ok (var-get collection-index))
+)
 
 ;; Get token uri
+(define-public (get-token-uri (id uint)) 
+    (ok 
+        (some (concat 
+            collection-root-uri 
+            (concat 
+                (uint-to-ascii id)
+                ".json"
+            )  
+        ))
+    )
+)
 
 ;; Get token owner
+(define-public (get-owner (id uint)) 
+    (ok (nft-get-owner? advanced-nft id))
+)
 
 ;; Transfer token
+(define-public (transfer (id uint) (sender principal) (recipient principal)) 
+    (begin
+        (asserts! (is-eq sender tx-sender) (err u1))
+        (if (is-some (map-get? market id)) 
+            (map-delete market id) 
+            false
+        )
+        (nft-transfer? advanced-nft id sender recipient)    
+    )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Noncustodial Funcs  ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; List in ustx
+(define-public (list-in-ustx (item uint) (price uint)) 
+    (let
+        (
+            (nft-owner (unwrap! (nft-get-owner? advanced-nft item) (err "err-nft-doesnt-exist")))
+        )
+            ;; Assert that tx-sender is-eq to nft-owner
+            (asserts! (is-eq tx-sender nft-owner) (err "err-not-owner"))
+
+            ;; Map set market with new NFT
+            (ok (map-set market item {price: price, owner: tx-sender}))    
+    )
+)
 
 ;; Unlist in ustx
+(define-public (unlist-in-ustx (item uint)) 
+    (let
+        (
+            (current-listing (unwrap! (map-get? market item) (err "err-nft-not-listed")))
+            (current-price (get price current-listing))
+            (current-owner (get owner current-listing))
+        )
 
+            ;; Assert that tx-sender is current-owner
+            (asserts! (is-eq tx-sender current-owner) (err "err-not-owner"))
+
+            ;; Map delete existing listing
+            (ok (map-delete market item))
+    )
+)
 ;; Buy in ustx
+(define-public (buy-in-ustx (item uint)) 
+    (let
+        (
+            (current-listing (unwrap! (map-get? market item) (err "err-nft-not-listed")))
+            (current-price (get price current-listing))
+            (current-owner (get owner current-listing))
+        )
+            ;; Tx-sender buys by transfering STX
+            (unwrap! (stx-transfer? current-price tx-sender current-owner) (err "err-stx-transfer"))
+
+            ;; Transfer NFT to new-buyer
+            (unwrap! (nft-transfer? advanced-nft item current-owner tx-sender) (err "err-nft-transfer"))
+
+            ;; Map-delete the listing
+            (ok (map-delete market item))
+    )
+)
 
 ;; Check listing
-
+(define-read-only (check-listing (item uint)) 
+    (map-get? market item)
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Mint Functions ;;;;
