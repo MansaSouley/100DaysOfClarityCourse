@@ -32,10 +32,10 @@
 (define-constant advanced-nft-price u10000000)
 
 ;; Admin Deployer
-(define-constant deployer tx-sender)
+(define-constant deployer  (as-contract tx-sender))
 
 ;; admin list
-(define-data-var admin (list 10 principal) (list tx-sender))
+(define-data-var admins (list 10 principal) (list tx-sender))
 
 ;; Marketplace map
 (define-map market uint {price: uint, owner: principal})
@@ -196,15 +196,48 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Add whitelist
+(define-public (whitelist-principal (user principal) (mints uint)) 
+    (let
+        (
+            (whitelist-mints (map-get? whitelist-map user))
+        )
+
+        ;; Assert that tx-sender is an admin
+        (asserts! (is-some (index-of (var-get admins) tx-sender)) (err "err-user-not-admin"))
+        
+        ;; Assert that whitelist-mints is-none
+        (asserts! (is-none whitelist-mints) (err "err-user-already-whitelisted"))
+
+        ;; Map set the whitelist-map
+        (ok (map-set whitelist-map user mints))        
+    )
+)
 
 ;; Check whitelist status
+(define-read-only (whitelist-status (user principal)) 
+    (map-get? whitelist-map user)
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Admin Functions ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Add admin
+(define-public (add-admin (new-admin principal)) 
+    (let
+        (
+            (current-admins (var-get admins))
+        )
+        ;; Assert that tx-sender is admin
+        (asserts! (is-some (index-of (var-get admins) tx-sender)) (err "err-user-not-admin"))
 
+        ;; Assert that new-admin is not already admin
+        (asserts! (is-none (index-of (var-get admins) new-admin)) (err "err-already-admin"))
+
+        ;; Var-set admins by appending new-admin
+        (ok (var-set admins ( unwrap! (as-max-len? (append current-admins new-admin) u10) (err "err-admin-overflow"))))
+    )
+)
 ;; Remove admin
 
 ;; Remove admin helper
