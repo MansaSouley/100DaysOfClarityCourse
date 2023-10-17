@@ -38,6 +38,9 @@ path = "contracts/increase-count-encap.clar"
 [contracts.increase-count-trail]
 path = "contracts/increase-count-trail.clar"
 
+[contracts.marketplace]
+path = "contracts/marketplace.clar"
+
 [contracts.nft-advanced]
 path = "contracts/nft-advanced.clar"
 
