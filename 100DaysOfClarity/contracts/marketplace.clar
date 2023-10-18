@@ -77,8 +77,24 @@
 (define-public (buy-item (nft-collection <nft>) (nft-item uint)) 
     (let
         (
-            
+
         )
+
+        ;; Assert NFT collection is whitelisted
+
+
+        ;; Assert that item is listed
+
+
+        ;; Assert tx-sender is NOT owner
+
+        ;; Send STX(price - royalty) to owner
+
+        ;; Send STX(royalty) to artist/royalty-address
+
+        ;; Transfer NFT from custodial/contract to buyer/NFT
+
+        ;; Map-delete item-listing
 
         (ok false)
     )
@@ -90,11 +106,76 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; List item
+;; @desc - func that allows an owner to list an NFT
+;; @param - collection:<nft-trait>, item:uint, price:uint
+(define-public (list-item (nft-collection <nft>) (nft-item uint) (nft-price uint)) 
+    (let
+        (
+
+        )
+
+        ;; Assert that tx-sender is current NFT owner
+
+        ;; Assert that collection is whitelisted
+
+        ;; Assert nft-item is NOT in collection-listings
+
+        ;; Assert item-status is-none
+
+        ;; Transfer NFT from tx-sender to contract
+
+        ;; Map-set item-status w/ new price & owner (tx-sender)
+
+        ;; Map-set collection-listing
+
+        (ok false)
+    )
+)
 
 ;; Unlist item
+(define-public (unlist-item (nft-collection <nft>) (nft-item uint)) 
+    (let
+        (
 
+        )
+
+        ;; Assert that current NFT owner is contract
+
+        ;; Assert that item-status is-some
+
+        ;; Assert that owner property from item-status tuple is tx-sender
+
+        ;; Assert that uint is in collection-listing map
+
+        ;; Transfer NFT back from contract to tx-sender/original owner
+
+        ;; Map-set collection-listing (remove uint)
+
+        ;; Map-set item-status (delete entry)
+    
+        (ok false)
+    )    
+)
 ;; change price
+(define-public (change-price (nft-collection <nft>) (nft-item uint) (nft-price uint)) 
+    (let
+        (
 
+        )
+
+        ;; Assert nft-item is in collection-listing
+
+        ;; Assert nft-item item-stats map-get is-some
+
+        ;; Assert nft current owner is contract
+
+        ;; Assert that tx-sender is Owner from item-status tuple
+
+        ;; Map-set merge item-status with new price
+
+        (ok false)
+    )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Artist Functions ;;;;
