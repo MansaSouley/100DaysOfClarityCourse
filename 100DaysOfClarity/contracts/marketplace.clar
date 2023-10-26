@@ -91,6 +91,7 @@
             (current-listing-price (get price current-listing))
             (current-listing-royalty (/ (* current-royalty-percent current-listing-price) u100))
             (current-listing-owner (get owner current-listing))
+            (current-tx-sender tx-sender)
         )       
 
 
@@ -107,7 +108,8 @@
         (unwrap! (stx-transfer? current-listing-royalty tx-sender current-royalty-address) (err "err-stx-transfer-royalty"))
 
         ;; Transfer NFT from custodial/contract to buyer/NFT
-        (unwrap! (contract-call? nft-collection transfer nft-item (as-contract tx-sender) tx-sender) (err "err-nft-transfer"))
+        ;;(unwrap! (contract-call? nft-collection transfer nft-item (as-contract tx-sender) tx-sender) (err "err-nft-transfer"))
+        (unwrap! (as-contract (contract-call? nft-collection transfer nft-item tx-sender current-tx-sender)) (err "err-nft-transfer"))
         
         ;; Map-delete item-listing
         (map-delete item-status {collection: (contract-of nft-collection), item: nft-item})
@@ -280,7 +282,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Accept or reject whitelisting
-(define-public (whitelisting-approval (nft-collection principal) (approval-boolean bool)) 
+(define-public (whitelisting-approval (nft-collection principal)) 
     (let
         (
             (current-collection (unwrap! (map-get? collection nft-collection) (err "err-collection-not-whitelisted")))
@@ -347,3 +349,11 @@
 (define-private (remove-uint-from-list (item-helper uint)) 
     (not (is-eq item-helper  (var-get helper-uint)))
 )
+
+;; 1. Artist submits a collection
+    ;; Submit Simple NFT
+;; 2. Admin approves/whitelists collection
+;; 3. User mints NFT
+;; 4. User lists NFT
+;; 5.1 User buys NFT
+;; 5.2 User unlists NFT
