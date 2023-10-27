@@ -53,6 +53,9 @@ path = "contracts/offspring-will.clar"
 [contracts.sip-09]
 path = "contracts/sip-09.clar"
 
+[contracts.sip-10]
+path = "contracts/sip-10.clar"
+
 [repl]
 costs_version = 2
 parser_version = 2
