@@ -50,6 +50,9 @@ path = "contracts/nft-simple.clar"
 [contracts.offspring-will]
 path = "contracts/offspring-will.clar"
 
+[contracts.simple-ft]
+path = "contracts/simple-ft.clar"
+
 [contracts.sip-09]
 path = "contracts/sip-09.clar"
 
