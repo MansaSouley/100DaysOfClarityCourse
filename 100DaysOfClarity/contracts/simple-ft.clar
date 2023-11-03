@@ -25,6 +25,18 @@
 ;; Token decimals
 (define-constant decimals u0)
 
+;; Claim Map
+(define-map can-claim principal bool)
+
+;;;;;;;;;;;;;;;;;;;
+;;;; Read-Only ;;;;
+;;;;;;;;;;;;;;;;;;;
+
+;; Can claim
+(define-read-only (get-claim-status (wallet principal)) 
+    (default-to true (map-get? can-claim wallet))
+)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; SIP-10 Functions  ;;;;
@@ -63,3 +75,27 @@
 (define-public (get-token-uri) 
     (ok none)
 )
+
+;;;;;;;;;;;;;;
+;;;; Mint ;;;;
+;;;;;;;;;;;;;;
+
+;; Free CT Claim
+(define-public (claim-ct) 
+    (let 
+        (
+            (current-claim-status (get-claim-status tx-sender))
+
+        )
+
+        ;; Assert that current-claim-status is true
+        (asserts! current-claim-status (err "err-already-claimed"))
+
+        ;; Mint 1 CT to tx-sender
+        (unwrap! (ft-mint? clarity-token u1 tx-sender) (err "err-mint-ft"))
+
+        ;; Change calim-status for tx-sender to false
+        (ok (map-set can-claim tx-sender false))
+    )
+)
+
