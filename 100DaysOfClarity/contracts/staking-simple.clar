@@ -12,7 +12,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; NFT status - map that keeps track of the status of an NFT
-(define-map nft-status uint {staked: bool, last-staked-or-claimed: uint})
+(define-map nft-status uint {last-staked-or-claimed: (optional uint), staker: principal})
 
 ;; Map that keeps track of all of a users stakes
 (define-map user-stakes principal (list 100 uint))
@@ -38,11 +38,11 @@
 (define-private (map-from-ids-to-height-differences (item uint)) 
     (let
         (
-            (current-item-status (default-to {staked: true, last-staked-or-claimed: block-height} (map-get? nft-status item)))
+            (current-item-status (default-to {last-staked-or-claimed: (some block-height), staker: tx-sender} (map-get? nft-status item)))
             (current-item-height (get last-staked-or-claimed current-item-status))
         )
 
-        (- block-height current-item-height)
+        (- block-height (default-to u0 current-item-height))
     )
 )
 
@@ -78,7 +78,11 @@
 
         ;; Assert that NFT submitted is not already staked
 
-        ;; Transfer NFT to stake contract
+        ;; Stake NFT Custodially -> Transfer NFT from tx-sender to contract
+
+        ;; Update NFT-status map
+
+        ;; Update user-stakes map
 
         (ok false)
     )
@@ -87,5 +91,30 @@
 
 
 ;; Unstake NFT
+;; @desc - function to unstake a staked NFT
+;; @param - Item (uint), NFT identifer for unstaking item
+(define-public (unstake-nft (item uint)) 
+    (let
+        (
+
+        )
+
+        ;; Asserts that item is staked
+
+        ;; Asserts that tx-sender is the previous staker
+
+        ;; Transfer NFT from contract to tx-sender/staker
+
+        ;; If unclaimed balanced > 0
+            ;; Send unclaimed balanced
+            ;; Don't send
+
+        ;; Update NFT-status map
+
+        ;; Update user-stakes map
+
+        (ok false)
+    )
+)
 
 ;; Claim CT Reward
