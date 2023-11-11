@@ -4,6 +4,9 @@
 ;; Written by Mansa Souley
 ;; Day 80
 
+;; Staking
+;; User earns 1 CT per block staked
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Cons, Vars & Maps ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -45,19 +48,44 @@
 
 
 ;; Check NFT stake status
-
+;; @desc - Read-only function that gets the current stake status (aka nft-status)
+;; @param 0 Item (uint), NFT identifier that we are checking status
+(define-read-only (get-stake-status (item uint)) 
+    (map-get? nft-status item)
+)
 
 
 ;; Check principal reward rate
-
-
+;; @desc - Read-only function that ggets the current total reward rate for tx-sender
+(define-read-only (get-reward-rate) 
+    (len (default-to (list ) (map-get? user-stakes tx-sender)))
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Core Writing Fnc ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Stake NFT
+;; @desc -Function to stake an unstaked nft-a item
+;; @param - Item (uint), NFT identifier for item submitted for staking
+(define-public (stake-nft (item uint)) 
+    (let
+        (
+
+        )
+
+        ;; Assert that user owns the NFT submitted
+
+        ;; Assert that NFT submitted is not already staked
+
+        ;; Transfer NFT to stake contract
+
+        (ok false)
+    )
+
+)
+
 
 ;; Unstake NFT
 
-;; Claim FT Reward
+;; Claim CT Reward
