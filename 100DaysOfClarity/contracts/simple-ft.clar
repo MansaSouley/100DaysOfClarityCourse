@@ -99,3 +99,23 @@
     )
 )
 
+;; Staking Claim
+;; @desc - Fcn only for mining from staking claims
+;; @param - Amount (uint), the amount of tokens earned through staking
+(define-public (earned-ct (amount uint)) 
+    (let
+        (
+
+        )
+
+        ;; Assert amount is lessthan remaining supply
+
+        ;; Assert that contract-caller is .staking-simple
+
+        ;; Mint token to tx-sender 
+
+        
+        (ok false)
+    )
+)
+

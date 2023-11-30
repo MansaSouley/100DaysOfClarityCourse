@@ -71,10 +71,11 @@
 (define-public (stake-nft (item uint)) 
     (let
         (
-
+            (current-nft-owner (unwrap! (contract-call? .nft-simple get-owner item) (err "err-not-item-minted")))
         )
 
         ;; Assert that user owns the NFT submitted
+        (asserts! (is-eq (some tx-sender) current-nft-owner) (err "err-not-nft-owner"))
 
         ;; Assert that NFT submitted is not already staked
 
@@ -118,3 +119,25 @@
 )
 
 ;; Claim CT Reward
+;; @desc - Function to claim un-claimed / earned CT
+;; @param - Item (uint), NFT identifier for claiming
+(define-public (claim-reward (item uint)) 
+    (let
+        (
+
+        )
+
+        ;; Assert that item is actively staked
+
+        ;; Assert that claimable balance > 0
+
+        ;; Assert that tx-sender is staker in the stake-status map
+
+        ;; Calculate reward & mint from FT contract
+
+        ;; Update nft-status map
+
+        (ok false)
+    )
+)
+
