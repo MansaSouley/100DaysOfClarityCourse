@@ -65,6 +65,7 @@
 ;;;; Core Writing Fnc ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
 ;; Stake NFT
 ;; @desc -Function to stake an unstaked nft-a item
 ;; @param - Item (uint), NFT identifier for item submitted for staking
@@ -72,22 +73,30 @@
     (let
         (
             (current-nft-owner (unwrap! (contract-call? .nft-simple get-owner item) (err "err-not-item-minted")))
+            (current-user-stakes (default-to (list) (map-get? user-stakes tx-sender)))
         )
 
         ;; Assert that user owns the NFT submitted
         (asserts! (is-eq (some tx-sender) current-nft-owner) (err "err-not-nft-owner"))
 
         ;; Assert that NFT submitted is not already staked
+        ;; Assert that last-claimed-or-staked is-none
+        (asserts! (or 
+                     (is-none (map-get? nft-status item)) 
+                     (is-none (get last-staked-or-claimed (default-to {last-staked-or-claimed: none, staker: tx-sender} (map-get? nft-status item))))
+                   ) 
+                   (err "err-nft-already-staked")
+        )
 
         ;; Stake NFT Custodially -> Transfer NFT from tx-sender to contract
+        (unwrap! (contract-call? .nft-simple transfer item tx-sender (as-contract tx-sender)) (err "err-transferring-nft"))
 
         ;; Update NFT-status map
+        (map-set nft-status item {last-staked-or-claimed: (some block-height), staker: tx-sender})
 
         ;; Update user-stakes map
-
-        (ok false)
+        (ok (unwrap! (as-max-len? (append current-user-stakes item) u100) (err "err-user-stakes-overflow")))
     )
-
 )
 
 
@@ -97,11 +106,13 @@
 (define-public (unstake-nft (item uint)) 
     (let
         (
-
+            (current-nft-status (unwrap! (map-get? nft-status item) (err "err-nft-not-staked")))
+            (current-user-stakes (unwrap! (map-get? user-stakes tx-sender) (err "err-user-has-no-stakes")))
         )
 
         ;; Asserts that item is staked
-
+        (asserts! (is-some (get last-staked-or-claimed current-nft-status)) (err "err-nft-not-staked"))
+        
         ;; Asserts that tx-sender is the previous staker
 
         ;; Transfer NFT from contract to tx-sender/staker
