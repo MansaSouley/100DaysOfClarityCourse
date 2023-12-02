@@ -98,7 +98,7 @@
         (map-set nft-status item {last-staked-or-claimed: (some block-height), staker: tx-sender})
 
         ;; Update user-stakes map
-        (ok (unwrap! (as-max-len? (append current-user-stakes item) u100) (err "err-user-stakes-overflow")))
+        (ok (map-set user-stakes tx-sender (unwrap! (as-max-len? (append current-user-stakes item) u100) (err "err-user-stakes-overflow"))))
     )
 )
 
