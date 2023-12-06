@@ -47,6 +47,9 @@ path = "contracts/nft-advanced.clar"
 [contracts.nft-simple]
 path = "contracts/nft-simple.clar"
 
+[contracts.odds-and-evens]
+path = "contracts/odds-and-evens.clar"
+
 [contracts.offspring-will]
 path = "contracts/offspring-will.clar"
 
