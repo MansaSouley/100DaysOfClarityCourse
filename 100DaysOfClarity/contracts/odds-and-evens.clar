@@ -18,13 +18,37 @@
 ;;;; Cons, Vars & Maps ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Min bet height in blocks
+(define-constant min-future-height  u10)
+
+;; Max bet height in blocks( ~ a week)
+(define-constant max-future-height u1008)
+
+;; Max user active bets
+(define-constant max-active-bets u3)
+
+;;; Max bet  amount
+(define-constant max-bet-amount u51)
+
+;; Create / match bet fee
+(define-constant create-match-fee u2000000)
+
+;; Cancel bet fee
+(define-constant cancel-fee u1000000)
+
 ;; Map that tracks the status of a bet
 (define-map bets uint {
     opens-bet: principal,
     matches-bet: (optional principal),
     amount-bet: uint,
-    height-bet: uint
+    height-bet: uint,
+    winner: (optional principal)
 })
+
+;; Map that tracks active bets per user
+(define-map user-bets principal {open-bets: (list 100 uint), active-bets: (list 3 uint)})
+;; Var all open bets
+(define-data-var open-bets (list 100 uint) (list ))
 
 ;; Var all active bets
 (define-data-var active-bets (list 100 uint) (list ))
@@ -36,8 +60,24 @@
 ;;;; Read-Only ;;;;
 ;;;;;;;;;;;;;;;;;;;
 
+;; Get all open bets
+(define-read-only (get-open-bets) 
+    (var-get open-bets)
+)
 
+;; Get all active bets
+(define-read-only (get-active-bets) 
+    (var-get active-bets)
+)
+;; Get specific bet
+(define-read-only (get-bet (bet-id uint))    
+    (map-get? bets bet-id)
+)
 
+;; Get user bets
+(define-read-only (get-user-bets (user principal)) 
+    (map-get? user-bets user)
+)
 
 ;;;;;;;;;;;;;;;;;;;
 ;;;; Bet Func ;;;;;
