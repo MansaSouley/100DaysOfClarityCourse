@@ -161,7 +161,6 @@
         vrf-lower-uint-opt
     )
 )
-
 ;; UTILITIES
 ;; lookup table for converting 1-byte bufferes to uints via index-of
 (define-constant BUFF_TO_BYTE (list 
@@ -190,18 +189,39 @@
 
 ;; Convert a little-endian 16-byte buff into a uint
 (define-private (buff-to-uint-le (word (buff 16))) 
-    ;; (get acc
-    ;;   (fold add-and-shift-uint-le (list u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) { acc: u0, data: word })
-    ;; )
-    (ok false)
+    (get acc
+      (fold add-and-shift-uint-le (list u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) { acc: u0, data: word })
+    )
 )
 
 ;; Inner fold function for converting a 16-byte buff into a uint
 (define-private (add-and-shift-uint-le (idx uint) (input { acc: uint, data: (buff 16)})) 
-    (ok false)
+    (let
+        (
+            (acc (get acc input))
+            (data (get data input))
+            (byte (buff-to-u8 (unwrap-panic (element-at data idx))))
+        )
+        { acc: (+ (* byte (pow u2 (* u8 (- u15 idx)))) acc), data: data }
+    )
 )
 
-;; COnvert the lower 16 bytes of a buff into a little-endian uint.
+;; Convert the lower 16 bytes of a buff into a little-endian uint.
 (define-private (lower-16-le (input (buff 32))) 
-    (ok false)
+    (get acc 
+        (fold lower-16-le-closure (list u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) {acc: 0x, data: input})
+    )
+)
+
+;; Inner closure for obtaining the lowe 16 bytes of a 32-byte buff
+(define-private (lower-16-le-closure (idx uint) (input {acc: (buff 16), data: (buff 32)})) 
+    (let
+        (
+            (acc (get acc input))
+            (data (get data input))
+            (byte (unwrap-panic (element-at data idx)))
+        )
+        {acc: (unwrap-panic (as-max-len? (concat acc byte) u16)),
+        data: data}
+    )
 )
